@@ -1,0 +1,63 @@
+COMPILER Program
+
+void NoDoubleSub() {
+    if (la.kind == _sub ) {
+        SemErr("Unexpected double '-'.");
+    }
+}
+
+CHARACTERS
+digit = '0' .. '9'.
+digitNotZero = '1' .. '9'.
+charLetter = 'A' .. 'Z' + 'a'..'z' + '_'.
+
+TOKENS
+identifier = charLetter.
+const = "const".
+var = "var".
+do = "do".
+while = "while".
+or = "||".
+and = "&&".
+not = "!".
+number = (digitNotZero {digit} | '0')['.' digit {digit}].
+relOp = ">=" | "<=" | '>' | '<'.
+eq = "==".
+ne = "!=".
+assign = ":=".
+add = '+'.
+sub = '-'.
+mul = '*'.
+div = '/'.
+
+IGNORE '\r' + '\n' + '\t'
+
+PRODUCTIONS
+Program = {Statement}.
+Statement = ConstInit ";"
+    | VarInit ";"
+    | VarAssign ";"
+    | DoWhileLoop ";".
+ConstInit = const Primary assign number.
+VarInit = var identifier assign (Expression | ArrayInitializer).
+VarAssign = Primary assign (Expression | ArrayInitializer).
+ArrayInitializer = "[]".
+DoWhileLoop = do Block while "(" Expression ")".
+Block = "{" {Statement} "}".
+Expression = Unary AssignExpression.
+AssignExpression = OrExpression {assign Unary OrExpression}.
+OrExpression = AndExpression {or Unary AndExpression}.
+AndExpression = EqExpression {and Unary EqExpression}.
+EqExpression = RelExpression {(eq | ne) Unary RelExpression}.
+RelExpression = AddExpression {relOp Unary AddExpression}.
+AddExpression = MulExpression {(add | (sub (. NoDoubleSub(); .))) Unary MulExpression}.
+MulExpression = {(mul | div) Unary}.
+Unary = [sub (. NoDoubleSub(); .) ]
+    (Primary
+    | number
+    | "(" Expression ")"
+    | not Expression).
+Primary = identifier [Indexer].
+Indexer = "[" Expression "]".
+
+END Program.

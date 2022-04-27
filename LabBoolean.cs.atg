@@ -1,0 +1,35 @@
+COMPILER Program
+IGNORECASE
+
+CHARACTERS
+digit = '0' .. '9'.
+letter = 'a'..'z' + '_'.
+hexDigit = '0' .. '9' + 'a' .. 'f'.
+
+TOKENS
+identifier = letter {digit | letter}.
+number = digit {hexDigit}.
+relOp = ">=" | "<=" | '>' | '<'.
+and = "and".
+or = "or".
+xor = "xor".
+not = "not".
+assign = ":=".
+
+IGNORE '\r' + '\n' + '\t'
+
+PRODUCTIONS
+Program = [Statement {";" Statement}].
+Statement = identifier assign Expression.
+Expression = Unary AssignExpression.
+AssignExpression = OrExpression {assign Unary OrExpression}.
+OrExpression = XorExpression {or Unary XorExpression}.
+XorExpression = AndExpression {xor Unary AndExpression}.
+AndExpression = RelExpression {and Unary RelExpression}.
+RelExpression = {relOp Unary}.
+Unary = identifier
+    | number
+    | "(" Expression ")"
+    | not Expression.
+
+END Program.
